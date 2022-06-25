@@ -1,6 +1,7 @@
+// @ts-ignore
 function randomFromInterval(min:number, max:number) { // min and max included 
     return Math.random() * (max - min) + min
-  }
+}
   
 class Perceptron {
     ws: number[]

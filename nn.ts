@@ -99,6 +99,10 @@ function nn() {
         output_response.push(unit.receive(hidden_response))
     }
     console.log(output_response.map(out => out.value))
+    console.log(links_ws)
+    console.log('Input Layer', input_layer.map(e=>e.id))
+    console.log('Hidden', hidden_layer.map(e=>e.id))
+    console.log('Output',output_layer.map(e=>e.id))
 }
 
 // cria um neuron generico, o bias neuron deve ser criado a mão pela classe Neuron
@@ -115,6 +119,7 @@ function createOutputNeuron() {
     last_id++
     return new OutputNeuron(last_id)
 }
+// @ts-ignore
 function randomFromInterval(min:number, max:number) { // min and max included 
     return Math.random() * (max - min) + min
 }

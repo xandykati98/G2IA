@@ -12,6 +12,14 @@ type NeuronOutput = {
     value: number;
 }
 
+const chunkArray = <T>(arr:T[], size:number) => {
+    const chunks:T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+        chunks.push(arr.slice(i, i + size));
+    }
+    return chunks;
+}
+
 function createLink(origin: Neuron, end: Neuron) {
     links_ws[origin.id+'_to_'+end.id] = randomFromInterval(0, 1)
     return links_ws[origin.id+'_to_'+end.id]
@@ -205,12 +213,15 @@ function nn() {
     }
     
     console.table({
+        taxa_de_aprendizado: ŋ,
+        num_iteracoes: num_iteracoes,
         primeiro_erro: E_log[0],
-        erro_minimo: Math.min.apply(Math, E_log),
-        erro_maximo: Math.max.apply(Math, E_log),
-        ultimo_erro: E_log[E_log.length - 1],
+        erro_minimo: `${Math.min.apply(Math, E_log)} na iteração ${E_log.indexOf(Math.min.apply(Math, E_log))}`,
+        erro_maximo: `${Math.max.apply(Math, E_log)} na iteração ${E_log.indexOf(Math.max.apply(Math, E_log))}`,
         erro_medio: sum(E_log)/E_log.length,
+        ultimo_erro: E_log[E_log.length - 1],
     })
+    console.log(chunkArray(E_log, E_log.length/8).map(chunk => sum(chunk)/chunk.length))
 }
 
 // cria um neuron generico, o bias neuron deve ser criado a mão pela classe Neuron

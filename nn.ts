@@ -37,6 +37,9 @@ class Neuron {
     constructor(id:number) {
         this.id = id;
     }
+    /**
+     * Retorna um objeto contendo o neuronio e o valor da saída dele, ou, `y`
+     */
     receive(inputs: NeuronOutput[]) {
         const weighted_sum = this.input_function(inputs)
         
@@ -45,6 +48,9 @@ class Neuron {
             value: this.activation_function(weighted_sum)
         }
     }
+    /**
+     * Computa os pesos e retorna o valor que vai ser passado para a função de ativação
+     */
     input_function(inputs: NeuronOutput[]): number {
         let sum = 0;
         for (const { value, origin } of inputs) {
@@ -53,13 +59,22 @@ class Neuron {
         }
         return sum
     }
+    /**
+     * Função de ativação sigmoid
+     */
     φ = this.activation_function;
+    /**
+     * Derivada da função de ativação sigmoid
+     */
     φ_derivative(input: number): number {
         return Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2)
     }
     φ_derivative_alt(input: number): number {
         return this.φ(input) * (1 - this.φ(input))
     }
+    /**
+     * Função de ativação sigmoid
+     */
     activation_function(input: number): number {
         return 1.0/(1.0 + Math.exp(-input))
     }
@@ -72,6 +87,7 @@ class InputNeuron extends Neuron {
         this.in_value = 1
     }
 }
+// uni duas arrays, tipo aquilo que tem no python
 const junct = <A, B>(arr1: A[], arr2:B[]):Array<[A,B, number]> => {
     return arr1.map((e, i) => [e, arr2[i], i])
 }
@@ -91,8 +107,8 @@ function nn() {
     const num_iteracoes = 100000;
     const ŋ = 0.01;
     let E_log:number[] = [];
-    // estrutura
 
+    // estrutura
     const input_layer:InputNeuron[] = [];
     const bias = new InputNeuron(0)
     input_layer.push(bias)
@@ -118,97 +134,97 @@ function nn() {
         }
     }
 
-    let xxxxx = 0;
-    while (xxxxx < num_iteracoes) {
+    let iteracao = 0;
+    while (iteracao < num_iteracoes) {
         let input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)]
         let desired = [(input[1] > (input[0]**2)) ? 1 : 0] 
         x_input.in_value = input[0];
         y_input.in_value = input[1];
 
-    // execute
-    const hidden_response:NeuronOutput[] = []
-    for (const unit of hidden_layer) {
-        hidden_response.push(unit.receive(input_layer.map(unit => ({ origin: unit, value: unit.in_value }) )))
-    }
-    
-    const output_response:NeuronOutput[] = [];
-    for (const unit of output_layer) {
-        output_response.push(unit.receive(hidden_response))
-    }
-    /**
-     * E = Erro global instantâneo (nessa iteração)
-     * E(n) = 1/2  \sum_{j=1}^{J} e^2_{j}(n)
-     */
-    let E = (1/2)*sum(output_response.map((unit, j) => (desired[j] - unit.value)**2))
-
-    // Vou pular o erro global médio pois estou usando iterações de 1 em 1
-
-    /**
-     * Calculo de gradiente local dos neuronios na camada de saida
-     * é bem simples já que a gente pode usar o calculo de erro com base na saida desejada
-     * δ_{j}(n)=-e_{j}(n)φ'_{j}(v_{j}(n))
-     * δ_{j}(n) = -(desired[j] - unit.value) * unit.φ'(unit.value)
-     */
-    
-    const δ_saida:{ origin: Neuron, value: number }[] = []
-    for (const [neuron, output, j] of junct(output_layer, output_response)) {
-        const δ = -(desired[j] - output.value) * neuron.φ_derivative(output.value)
-        δ_saida.push({ origin: neuron, value: δ })
-    }
-
-    // armazenar todos os deltas no mesmo lugar pra atualizar todos os pesos no fim da iteração
-    const Δw_global:Array<[number, string]> = []
-
-    /**
-     * Calculo de delta de pesos entre a camada oculta e a camada de saida
-     * Δw_{ij}=-ηδ_{j}(n)y_{i}(n)
-     */
-    // output_hidden = y_i(n)
-    // Δw_{ij}=-ηδ_{j}(n)y_{i}(n)
-    for (const output_hidden of hidden_response) {
-        for (const { origin, value: δ } of δ_saida) {
-            const Δw = -ŋ * δ * output_hidden.value
-            Δw_global.push([Δw, findLink(output_hidden.origin, origin)])
+        // execute
+        const hidden_response:NeuronOutput[] = []
+        for (const unit of hidden_layer) {
+            hidden_response.push(unit.receive(input_layer.map(unit => ({ origin: unit, value: unit.in_value }) )))
         }
-    }
-
-    
-    /**
-     * Calculo de gradiente local dos neuronios na camada escondida
-     * δ_{j}(n)=φ'_{j}(v_{j}(n)) \sum_{i=1}^{I}δ_{i}(n)w_{ji}
-     */
-    const δ_hidden:{ origin: Neuron, value: number }[] = []
-    for (const [neuron, output, j] of junct(hidden_layer, hidden_response)) {
+        
+        const output_response:NeuronOutput[] = [];
+        for (const unit of output_layer) {
+            output_response.push(unit.receive(hidden_response))
+        }
         /**
-         * sugestão do copilot, to sem cabeça pra saber se ta certo
-        const δ = sum(Δw_global.filter(([Δw, link]) => link === findLink(neuron, output.origin)).map(([Δw, link]) => Δw))
-        δ_hidden.push({ origin: neuron, value: δ })
+         * E = Erro global instantâneo (nessa iteração)
+         * E(n) = 1/2  \sum_{j=1}^{J} e^2_{j}(n)
+         */
+        let E = (1/2)*sum(output_response.map((unit, j) => (desired[j] - unit.value)**2))
+
+        // Vou pular o erro global médio pois estou usando iterações de 1 em 1
+
+        /**
+         * Calculo de gradiente local dos neuronios na camada de saida
+         * é bem simples já que a gente pode usar o calculo de erro com base na saida desejada
+         * δ_{j}(n)=-e_{j}(n)φ'_{j}(v_{j}(n))
+         * δ_{j}(n) = -(desired[j] - unit.value) * unit.φ'(unit.value)
+         */
+        
+        const δ_saida:{ origin: Neuron, value: number }[] = []
+        for (const [neuron, output, j] of junct(output_layer, output_response)) {
+            const δ = -(desired[j] - output.value) * neuron.φ_derivative(output.value)
+            δ_saida.push({ origin: neuron, value: δ })
+        }
+
+        // armazenar todos os deltas no mesmo lugar pra atualizar todos os pesos no fim da iteração
+        const Δw_global:Array<[number, string]> = []
+
+        /**
+         * Calculo de delta de pesos entre a camada oculta e a camada de saida
+         * Δw_{ij}=-ηδ_{j}(n)y_{i}(n)
+         */
+        // output_hidden = y_i(n)
+        // Δw_{ij}=-ηδ_{j}(n)y_{i}(n)
+        for (const output_hidden of hidden_response) {
+            for (const { origin, value: δ } of δ_saida) {
+                const Δw = -ŋ * δ * output_hidden.value
+                Δw_global.push([Δw, findLink(output_hidden.origin, origin)])
+            }
+        }
+
+        
+        /**
+         * Calculo de gradiente local dos neuronios na camada escondida
+         * δ_{j}(n)=φ'_{j}(v_{j}(n)) \sum_{i=1}^{I}δ_{i}(n)w_{ji}
+         */
+        const δ_hidden:{ origin: Neuron, value: number }[] = []
+        for (const [neuron, output, j] of junct(hidden_layer, hidden_response)) {
+            /**
+             * sugestão do copilot, to sem cabeça pra saber se ta certo
+            const δ = sum(Δw_global.filter(([Δw, link]) => link === findLink(neuron, output.origin)).map(([Δw, link]) => Δw))
+            δ_hidden.push({ origin: neuron, value: δ })
+            */
+
+            const δ = neuron.φ_derivative(output.value) * sum(δ_saida.map(({value: grad_local, origin}, j) => grad_local * findLinkWeight(output.origin, origin)))
+            δ_hidden.push({ origin: neuron, value: δ })
+        }
+
+
+        /**
+         * Calculo de delta de pesos entre a camada de entrada e a camada oculta
+         * Δw_{ij}=-ηδ_{j}(n)y_{i}(n)=ηδ_{j}(n)x_{i}(n)
          */
 
-        const δ = neuron.φ_derivative(output.value) * sum(δ_saida.map(({value: grad_local, origin}, j) => grad_local * findLinkWeight(output.origin, origin)))
-        δ_hidden.push({ origin: neuron, value: δ })
-    }
-
-
-    /**
-     * Calculo de delta de pesos entre a camada de entrada e a camada oculta
-     * Δw_{ij}=-ηδ_{j}(n)y_{i}(n)=ηδ_{j}(n)x_{i}(n)
-     */
-
-    for (const neuron_input of input_layer) {
-        for (const { origin, value: δ } of δ_hidden) {
-            const Δw = -ŋ * δ * neuron_input.in_value
-            Δw_global.push([Δw, findLink(neuron_input, origin)])
+        for (const neuron_input of input_layer) {
+            for (const { origin, value: δ } of δ_hidden) {
+                const Δw = -ŋ * δ * neuron_input.in_value
+                Δw_global.push([Δw, findLink(neuron_input, origin)])
+            }
         }
-    }
 
 
 
-    for (const [ Δw, link_name ] of Δw_global) {
-        links_ws[link_name] = links_ws[link_name] + Δw
-    }
-    console.log(E, input, desired, output_response.map(unit => unit.value))
-        xxxxx++
+        for (const [ Δw, link_name ] of Δw_global) {
+            links_ws[link_name] = links_ws[link_name] + Δw
+        }
+        console.log(E, input, desired, output_response.map(unit => unit.value))
+        iteracao++
         E_log.push(E)
     }
     

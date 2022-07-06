@@ -98,7 +98,7 @@ function scaleBetween(unscaledNum:number, minAllowed:number, maxAllowed:number, 
     return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
 }
 function sigmoidRandom(min:number, max:number) {
-    return scaleBetween(randomFromInterval(min, max), -1, 1, min, max)
+    return scaleBetween(randomFromInterval(min, max), 0, 1, min, max)
 }
 const sum = (arr:number[]) => arr.reduce((a, b)=>a+b, 0)
 // add backpropagation ou outra forma de treinar
@@ -137,7 +137,7 @@ function nn() {
     let iteracao = 0;
     while (iteracao < num_iteracoes) {
         let input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)]
-        let desired = [(input[1] > (input[0]**2)) ? 1 : 0] 
+        let desired = [(input[1] > (input[0]**2)) ? 1 : 0]
         x_input.in_value = input[0];
         y_input.in_value = input[1];
 
@@ -223,7 +223,7 @@ function nn() {
         for (const [ Δw, link_name ] of Δw_global) {
             links_ws[link_name] = links_ws[link_name] + Δw
         }
-        console.log(E, input, desired, output_response.map(unit => unit.value))
+        //console.log(E, input, desired, output_response.map(unit => unit.value))
         iteracao++
         E_log.push(E)
     }
@@ -238,6 +238,53 @@ function nn() {
         ultimo_erro: E_log[E_log.length - 1],
     })
     console.log(chunkArray(E_log, E_log.length/8).map(chunk => sum(chunk)/chunk.length))
+    let i_validacao = 0
+    let falso_positivos = 0;
+    let falso_negativos = 0;
+    let verdadeiros_positivos = 0;
+    let verdadeiros_negativos = 0;
+    while (i_validacao < 100) {
+        
+        let input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)]
+        let desired = [(input[1] > (input[0]**2)) ? 1 : 0]
+        x_input.in_value = input[0];
+        y_input.in_value = input[1];
+
+        // execute
+        const hidden_response:NeuronOutput[] = []
+        for (const unit of hidden_layer) {
+            hidden_response.push(unit.receive(input_layer.map(unit => ({ origin: unit, value: unit.in_value }) )))
+        }
+        
+        const output_response:NeuronOutput[] = [];
+        for (const unit of output_layer) {
+            output_response.push(unit.receive(hidden_response))
+        }
+        const guess = output_response[0].value
+        const guess_rounded = guess > 0.5 ? 1 : 0
+        if (guess_rounded === desired[0]) {
+            if (guess_rounded === 1) {
+                verdadeiros_positivos++
+            } else {
+                verdadeiros_negativos++
+            }
+        } else {
+            if (guess_rounded === 1) {
+                falso_positivos++
+            } else {
+                falso_negativos++
+            }
+        }
+        i_validacao++
+    }
+    const accuracy = (verdadeiros_positivos + verdadeiros_negativos) / (verdadeiros_positivos + verdadeiros_negativos + falso_positivos + falso_negativos)
+    console.log({
+        falso_negativos,
+        falso_positivos,
+        verdadeiros_negativos,
+        verdadeiros_positivos, 
+        accuracy
+    })
 }
 
 // cria um neuron generico, o bias neuron deve ser criado a mão pela classe Neuron
@@ -260,3 +307,5 @@ function randomFromInterval(min:number, max:number) { // min and max included
 }
   
 nn()
+console.log(links_ws)
+export default nn;

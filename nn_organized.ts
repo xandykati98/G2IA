@@ -12,17 +12,6 @@ let links_ws: {
 } = {}
 
 /**
- * @todo comment
- */
-const chunkArray = <T>(arr:T[], size:number) => {
-    const chunks:T[][] = [];
-    for (let i = 0; i < arr.length; i += size) {
-        chunks.push(arr.slice(i, i + size));
-    }
-    return chunks;
-}
-
-/**
  * unifica duas arrays, retornando uma nova array contendo todos os elementos das duas
  */
 const junct = <A, B>(arr1: A[], arr2:B[]):Array<[A,B, number]> => {
@@ -175,7 +164,6 @@ type LayerConfig = {
      * True se a camada for uma camada de entrada
      */
     is_input?: boolean,
-    id: string,
     /**
      * True se a camada for uma camada de saída
      */
@@ -264,16 +252,28 @@ class NeuralNetwork {
     }
     train_iteration(inputs:number[], desired_outputs:number[], config: TrainConfig):number {
         const input_layer = this.layers[0];
-        // @todo comentar
+        /**
+         * Adiciona os valores de entrada aos neurônios de entrada
+         */
         for (const [index, neuron] of (input_layer.neurons as InputNeuron[]).entries()) {
             neuron.in_value = inputs[index];
         }
+        /**
+         * Salva o valor de Y de todos os neuronios de todas as camadas em ordem sequencial 
+         * (a camada de saida não é considerada) 
+         * (a camada de entrada é o primeiro index da array)
+         */
         const layer_neuron_outputs:NeuronOutput[][] = [
             (input_layer.neurons as InputNeuron[]).map(neuron => ({ origin: neuron, value: neuron.in_value }) )
         ];
 
+        /**
+         * Alimenta os valores para frente, sempre se baseando na última camada que foi alimentada
+         */
         for (const { config, neurons } of this.layers) {
             if (config.is_output) {
+                // o resultado da camada de saida é criado fora do loop para preservar o valor de Y nos calculos iniciais da retropropagação
+                // ps.: talvez esse valor poderia ser armazenado na variavel layer_neuron_outputs também mas escolhi assim para acessar a variavel mais facilmente
                 break;
             }
             if (config.is_hidden) {
@@ -304,8 +304,9 @@ class NeuralNetwork {
         // armazenar todos os deltas no mesmo lugar pra atualizar todos os pesos no fim da iteração
         const Δw_global:Array<[number, string]> = []
 
+        // armazenar todos os valores das gradientes de cada camada (de forma contrária ao fluxo de dados, a camada de saida vai estar no index 0)
         const δ_layers:{ origin: Neuron, value: number }[][] = []
-        const ff_layers:Layer[] = []
+        
         // Ref.: https://stackoverflow.com/questions/30610523/reverse-array-in-javascript-without-mutating-original-array
         for (const [layer_index, layer] of this.layers.slice().reverse().entries()) {
             const layer_neuron_output = layer_neuron_outputs[layer_neuron_outputs.length - layer_index];
@@ -322,7 +323,6 @@ class NeuralNetwork {
                     δ_saida.push({ origin: neuron, value: δ })
                 }
                 δ_layers.push(δ_saida)
-                ff_layers.push(layer)
                 /**
                  * Calculo de delta de pesos entre a camada oculta antes da camada de saida e a camada de saida
                  * Δw_{ij}=-ηδ_{j}(n)y_{i}(n)
@@ -345,7 +345,6 @@ class NeuralNetwork {
                     δ_escondida.push({ origin: neuron, value: δ })
                 }
                 δ_layers.push(δ_escondida)
-                ff_layers.push(layer)
                 
                 /**
                  * Calculo de delta de pesos entre a camada (J-1) e a camada oculta (J)
@@ -368,8 +367,13 @@ class NeuralNetwork {
 
         return E;
     }
+    /**
+     * Imita a propagação de uma entrada da rede até a camada de saida, retornando o resultado da saida
+     * @param _inputs array de arrays de valores de entrada
+     * @returns O chute da rede neural
+     */
     guess(_inputs:number[]) {
-        let inputs:number[] = _inputs;
+        let inputs:number[] = [..._inputs];
         const input_layer = this.layers[0];
         if (input_layer.config.bias) {
             inputs.unshift(1);
@@ -437,26 +441,23 @@ class NeuralNetwork {
     }
 }
 
-let a = new NeuralNetwork()
-a.pushLayer({
+let rede = new NeuralNetwork()
+rede.pushLayer({
     is_input: true,
     bias: true,
     neurons_number: 2,
-    id: 'input',
 })
 
-a.pushLayer({
+rede.pushLayer({
     neurons_number:4,
-    id: 'hidden',
 })
 
-a.pushLayer({
+rede.pushLayer({
     is_output: true,
     neurons_number: 1,
-    id: 'output',
 })
 
-a.createWeights()
+rede.createWeights()
 
 // Criação do conjunto de treinamento
 let t_set:any[] = []
@@ -468,8 +469,8 @@ while (t_set.length < 400) {
     })
 }
 
-a.train({
-    epochs: 1,
+rede.train({
+    epochs: 3,
     iteracoes: 100000,
     taxa_aprendizado: 0.01,
     training_set: t_set,
@@ -494,7 +495,7 @@ let falso_negativos = 0;
 let verdadeiros_positivos = 0;
 let verdadeiros_negativos = 0;
 for (const item of v_set) {
-    const guess:number = a.guess(item.inputs)[0] > 0.5 ? 1 : 0
+    const guess:number = rede.guess(item.inputs)[0] > 0.5 ? 1 : 0
     const expected:number = item.desired_outputs[0]
     if (guess === expected) {
         if (guess === 1) {

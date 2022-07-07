@@ -1,6 +1,3 @@
-// Deu tudo errado
-
-
 /**
  * Objeto contendo valores dos pesos das conexões entre dois neurônios (origem e destino)
  * @example 
@@ -21,7 +18,7 @@ const junct = <A, B>(arr1: A[], arr2:B[]):Array<[A,B, number]> => {
 /**
  * Escala/reduz um número entre dois valores
  */
-function scaleBetween(unscaledNum:number, minAllowed:number, maxAllowed:number, min:number, max:number) {
+export function scaleBetween(unscaledNum:number, minAllowed:number, maxAllowed:number, min:number, max:number) {
     return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
 }
 /**
@@ -193,6 +190,8 @@ type TrainConfig = {
      * Número de vezes que o algoritmo de treinamento será executado
      */
     epochs: number,
+    momentum?: number,
+    debug?: boolean,
     /**
      * Número de vezes que o algoritmo de treinamento será executado por epoch
      */
@@ -211,7 +210,7 @@ type TrainConfig = {
 /**
  * @note A rede só suporta 1 neuronio de bias na camada de entrada
  */
-class NeuralNetwork {
+export class NeuralNetwork {
     layers: Layer[];
     constructor() {
         this.layers = [];
@@ -285,7 +284,9 @@ class NeuralNetwork {
                 layer_neuron_outputs.push(hidden_response);
             }
         }
-        
+        //for (const [i,l] of layer_neuron_outputs.entries()) {
+        //    console.log(i,l.map(n => n.value).join(', '))
+        //}
         // Resultado da camada de saida
         const output_response:NeuronOutput[] = [];
         for (const unit of this.layers[this.layers.length - 1].neurons) {
@@ -360,7 +361,7 @@ class NeuralNetwork {
                 // não faz nada
             }
         }
-
+        //console.log(Δw_global)
         for (const [ Δw, link_name ] of Δw_global) {
             links_ws[link_name]+= Δw
         }
@@ -405,7 +406,14 @@ class NeuralNetwork {
         }
         return output_response.map(e=>e.value);
     }
+    test(test_set:{inputs: number[], desired_outputs: number[]}[], test_iteration?: (err: number, output: number[], desired: number[]) => any) {
+        for (const {inputs, desired_outputs} of test_set) {
+            const output = this.guess(inputs);
 
+            const error = sum(desired_outputs.map((desired, i) => Math.abs(desired - output[i])))
+            test_iteration && test_iteration(error, output, desired_outputs)
+        }
+    }
     train(config: TrainConfig) {
         const Ēs:number[] = []
         // Executa o treinamento
@@ -418,6 +426,9 @@ class NeuralNetwork {
                 let inputs = training_item.inputs;
                 if (this.layers[0].config.bias) {
                     inputs = [1, ...inputs]
+                }
+                if (config.debug && i % 10 == 0) {
+                    console.log(`Epoch: ${epoch}/${config.epochs} Iteração: ${i}/${config.iteracoes}`)
                 }
                 error += this.train_iteration(inputs, training_item.desired_outputs, config)
             }
@@ -440,6 +451,10 @@ class NeuralNetwork {
         })
     }
 }
+
+/**
+ * Descomentar o código abaixo para testar a rede neural com o problema de classificar a função y=x^2
+ */
 
 let rede = new NeuralNetwork()
 rede.pushLayer({
@@ -465,27 +480,30 @@ while (t_set.length < 400) {
     const input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)];
     t_set.push({
         inputs: input,
-        desired_outputs: [(input[1] > (input[0]**2)) ? 1 : 0]
+        desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
     })
 }
 
 rede.train({
-    epochs: 3,
-    iteracoes: 100000,
+    epochs: 30,
+    iteracoes: 10000,
     taxa_aprendizado: 0.01,
     training_set: t_set,
 })
 
 // Validação
-let v_set:any = []
+let v_set:any = [{
+    inputs: [sigmoidRandom(3.6, 3.7), sigmoidRandom(17, 17.1)],
+    desired_outputs: [1]
+}]
 
 let i_validacao = 0;
 
-while (i_validacao < 100) {
+while (i_validacao < 1000) {
     const input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)];
     v_set.push({
         inputs: input,
-        desired_outputs: [(input[1] > (input[0]**2)) ? 1 : 0]
+        desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
     })
     i_validacao++;
 }
@@ -494,9 +512,13 @@ let falso_positivos = 0;
 let falso_negativos = 0;
 let verdadeiros_positivos = 0;
 let verdadeiros_negativos = 0;
+let ii = 0
 for (const item of v_set) {
     const guess:number = rede.guess(item.inputs)[0] > 0.5 ? 1 : 0
     const expected:number = item.desired_outputs[0]
+    if (ii === 0) {
+        console.log(guess, expected)
+    }
     if (guess === expected) {
         if (guess === 1) {
             verdadeiros_positivos++;
@@ -510,12 +532,13 @@ for (const item of v_set) {
             falso_negativos++;
         }
     }
+    ii++
 }
 const accuracy = (verdadeiros_positivos + verdadeiros_negativos) / (verdadeiros_positivos + verdadeiros_negativos + falso_positivos + falso_negativos);
-console.log({
+console.table({
     verdadeiros_positivos,
     verdadeiros_negativos,
     falso_positivos,
     falso_negativos,
     accuracy
-})
+}) 

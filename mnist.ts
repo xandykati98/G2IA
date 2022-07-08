@@ -41,9 +41,7 @@ const normalized_train_set = train.map(item => ({
     .filter((_, i) => i % 2 === 0)
     .filter((_, i) => i % 2 !== 0)
     .filter((_, i) => i % 2 === 0)
-    .filter((_, i) => i % 2 !== 0)
-    .filter((_, i) => i % 2 === 0)
-    .filter((_, i) => i % 2 === 0), 
+    .filter((_, i) => i % 2 !== 0), 
     desired_outputs: label_to_output(item.label) 
 }))
 console.log(normalized_train_set[0].inputs.length)

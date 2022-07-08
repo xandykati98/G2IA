@@ -1,5 +1,6 @@
 /**
- * Objeto contendo valores dos pesos das conexões entre dois neurônios (origem e destino)
+ * Objeto contendo valores dos pesos das 
+ * conexões entre dois neurônios (origem e destino)
  * @example 
  * links_ws['0_to_1'] = 0.5
  * // 0 e 1 são os ids dos neurônios
@@ -49,7 +50,7 @@ function randomFromInterval(min:number, max:number) {
  * @returns peso da conexão entre os dois neurônios
  */
 function createLink(origin: Neuron, end: Neuron) {
-    links_ws[origin.id+'_to_'+end.id] = randomFromInterval(0, 1)
+    links_ws[origin.id+'_to_'+end.id] = randomFromInterval(-1, 1)
     return links_ws[origin.id+'_to_'+end.id]
 }
 
@@ -81,6 +82,11 @@ type NeuronOutput = {
      */
     origin: Neuron;
     /**
+     * Soma ponderada dos valores de entrada
+     * `v_{i}(n)`
+     */
+    weighted_sum?: number;
+    /**
      * Valor da saída do neurônio
      * `y_{i}(n)`
      */
@@ -100,13 +106,15 @@ class Neuron {
         next_id++;
     }
     /**
-     * Retorna um objeto contendo o neuronio e o valor da saída dele, ou, `y`
+     * Retorna um objeto contendo o neuronio 
+     * e o valor da saída dele, ou, `y`
      */
     receive(inputs: NeuronOutput[]) {
         const weighted_sum = this.input_function(inputs)
         
         return {
             origin: this,
+            weighted_sum,
             value: this.activation_function(weighted_sum)
         }
     }
@@ -287,6 +295,7 @@ export class NeuralNetwork {
         //for (const [i,l] of layer_neuron_outputs.entries()) {
         //    console.log(i,l.map(n => n.value).join(', '))
         //}
+        
         // Resultado da camada de saida
         const output_response:NeuronOutput[] = [];
         for (const unit of this.layers[this.layers.length - 1].neurons) {
@@ -320,7 +329,7 @@ export class NeuralNetwork {
                  */
                 const δ_saida:{ origin: Neuron, value: number }[] = []
                 for (const [neuron, output, j]  of junct(layer.neurons, output_response)) {
-                    const δ = -(desired_outputs[j] - output.value) * neuron.φ_derivative(output.value)
+                    const δ = -(desired_outputs[j] - output.value) * neuron.φ_derivative(output.weighted_sum as number)
                     δ_saida.push({ origin: neuron, value: δ })
                 }
                 δ_layers.push(δ_saida)
@@ -342,7 +351,7 @@ export class NeuralNetwork {
                 const δ_escondida:{ origin: Neuron, value: number }[] = []
                 //console.log(layer.config.id, ff_layers[layer_index - 1].config.id)
                 for (const [neuron, output, j] of junct(layer.neurons, layer_neuron_output)) {
-                    const δ = neuron.φ_derivative(output.value) * sum(δ_layers[layer_index - 1].map(({value: grad_local, origin}, j) => grad_local * findLinkWeight(output.origin, origin)))
+                    const δ = neuron.φ_derivative(output.weighted_sum as number) * sum(δ_layers[layer_index - 1].map(({value: grad_local, origin}, j) => grad_local * findLinkWeight(output.origin, origin)))
                     δ_escondida.push({ origin: neuron, value: δ })
                 }
                 δ_layers.push(δ_escondida)

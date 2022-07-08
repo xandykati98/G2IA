@@ -25,6 +25,7 @@ class Perceptron {
         return this.activate(sum)
     }
     train(inputs:number[], desired:number) {
+        // Y
         const guess = this.feedforward(inputs);
         const error = desired - guess;
         for (let i = 0; i < inputs.length; i++) {
@@ -63,7 +64,8 @@ function setup_and_train(n_training: number, ptron: Perceptron) {
     }
     console.log(ptron.ws)
 }
-
+let falso_negativos = 0;
+let falso_positivos = 0;
 function test(n_test: number, ptron: Perceptron) {
     let errors = 0;
     for (let i = 0; i < n_test; i++) {
@@ -71,11 +73,14 @@ function test(n_test: number, ptron: Perceptron) {
         const y = randomFromInterval(-100, 100)
         const a = y < f(x) ? -1 : 1
         const guess = ptron.feedforward([x, y, 1])
-        if (guess != a) errors++
+        if (guess != a) {
+            a === -1? falso_positivos++ : falso_negativos++
+            errors++
+        }
     }
     // 1 = bom, 0 = ruim
     const e = (n_test-errors)/n_test
-    console.log({errors, e})
+    console.log({errors, e, falso_positivos, falso_negativos})
     return e
 }
 

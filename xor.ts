@@ -7,7 +7,7 @@ rede.pushLayer({
     bias: true
 })
 rede.pushLayer({
-    neurons_number: 2,
+    neurons_number: 4,
 })
 rede.pushLayer({
     is_output: true,
@@ -46,7 +46,7 @@ rede.train({
     epochs: 90,
     momentum: 0.01,
     iteracoes: 10000,
-    taxa_aprendizado: 0.8,
+    taxa_aprendizado: 0.01,
     training_set: train_set,
 })
 

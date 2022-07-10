@@ -10,6 +10,13 @@ export let links_ws: {
 } = {}
 
 /**
+ * Limpa todos os pesos das conexões entre neurônios
+ */
+export function clearLinks() {
+    links_ws = {}
+}
+
+/**
  * unifica duas arrays, retornando uma nova array contendo todos os elementos das duas
  */
 export const junct = <A, B>(arr1: A[], arr2:B[]):Array<[A,B, number]> => {
@@ -99,7 +106,7 @@ let next_id = 0;
 /**
  * Classe que representa um neurônio
  */
-class Neuron {
+export class Neuron {
     id: number;
     constructor() {
         this.id = next_id;
@@ -193,13 +200,14 @@ type Layer = {
     neurons: Neuron[]
 };
 
-type TrainConfig = {
+export type TrainConfig = {
     /**
      * Número de vezes que o algoritmo de treinamento será executado
      */
     epochs: number,
     momentum?: number,
     debug?: boolean,
+    silent?: boolean,
     /**
      * Número de vezes que o algoritmo de treinamento será executado por epoch
      */
@@ -436,18 +444,20 @@ export class NeuralNetwork {
                 if (this.layers[0].config.bias) {
                     inputs = [1, ...inputs]
                 }
-                if (config.debug && i % 10 == 0) {
+                if (config.debug && i % 100 == 0) {
                     console.log(`Epoch: ${epoch}/${config.epochs} Iteração: ${i}/${config.iteracoes}`)
                 }
                 error += this.train_iteration(inputs, training_item.desired_outputs, config)
             }
             const Ē = (1/config.iteracoes)*error
-            console.log({epoch, erro_medio: Ē})
+            if (!config.silent) {
+                console.log({epoch, erro_medio: Ē})
+            }
             Ēs.push(Ē)
             // Verifica se a parada deve ser feita
             if (config.stop_condition && config.stop_condition(epoch, error)) break;
         }
-        console.log({
+        const train_result = {
             epochs: config.epochs,
             mean_error: sum(Ēs)/Ēs.length,
             std_error: Math.sqrt(sum((Ēs.map(Ē => (Ē - sum(Ēs)/Ēs.length)**2)))/Ēs.length),
@@ -457,6 +467,10 @@ export class NeuralNetwork {
             last_error: Ēs[Ēs.length - 1],
             taxa_aprendizado: config.taxa_aprendizado,
             iteracoes_por_epoch: config.iteracoes,
-        })
+        }
+        if (!config.silent) {
+            console.log(train_result)
+        }
+        return train_result
     }
 }

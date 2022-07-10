@@ -1,9 +1,10 @@
+import { benchmark } from "./benchmark";
 import { NeuralNetwork } from "./nn_organized";
 
 const rede = new NeuralNetwork();
 rede.pushLayer({
     is_input: true,
-    neurons_number: 3,
+    neurons_number: 2,
     bias: true
 })
 rede.pushLayer({
@@ -37,19 +38,29 @@ while (test_set.length < 200) {
     const y = Math.random() > 0.5 ? 1 : 0;
 
     test_set.push({
-        inputs: [x, y, 1],
+        inputs: [x, y],
         desired_outputs: [x ^ y],
     });
 }
-
-rede.train({
+const train_config = {
     epochs: 90,
     momentum: 0.01,
     iteracoes: 10000,
     taxa_aprendizado: 0.01,
     training_set: train_set,
+    silent: true
+}
+//rede.train(train_config)
+
+benchmark({
+    v_set: test_set,
+    train_config: train_config,
+    rede: rede,
+    get_prediction: output => Math.round(output),
+    bechnmark_name: "xor",
 })
 
+/*
 let falso_positivos = 0;
 let falso_negativos = 0;
 let verdadeiros_positivos = 0;
@@ -78,4 +89,4 @@ console.log({
     falso_positivos,
     falso_negativos,
     accuracy,
-})
+})*/

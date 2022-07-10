@@ -47,8 +47,8 @@ const normalized_train_set = train.map(item => ({
 console.log(normalized_train_set[0].inputs.length)
 rede.train({
     taxa_aprendizado: 0.01,
-    epochs: 1,
-    iteracoes: 100,
+    epochs: 1000,
+    iteracoes: 10,
     debug: true,
     training_set: normalized_train_set
 })

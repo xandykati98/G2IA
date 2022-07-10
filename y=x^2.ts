@@ -1,3 +1,4 @@
+import { benchmark } from "./benchmark"
 import { NeuralNetwork, sigmoidRandom } from "./nn_organized"
 
 let rede = new NeuralNetwork()
@@ -27,13 +28,15 @@ while (t_set.length < 400) {
         desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
     })
 }
-
-rede.train({
+const train_config = {
     epochs: 60,
     iteracoes: 10000,
     taxa_aprendizado: 0.01,
     training_set: t_set,
-})
+}
+/*
+rede.train(train_config)
+*/
 
 // Validação
 let v_set:any = [{
@@ -52,6 +55,15 @@ while (i_validacao < 1000) {
     i_validacao++;
 }
 
+benchmark({
+    v_set: v_set, 
+    train_config: train_config, 
+    get_prediction: output => output > 0.5 ? 1 : 0, 
+    rede: rede, 
+    bechnmark_name: "y=x^2"
+})
+
+/*
 let falso_positivos = 0;
 let falso_negativos = 0;
 let verdadeiros_positivos = 0;
@@ -86,3 +98,4 @@ console.table({
     falso_negativos,
     accuracy
 })
+*/

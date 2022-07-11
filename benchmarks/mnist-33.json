@@ -1,0 +1,33 @@
+{
+  "epochs": 30,
+  "iteracoes": 3200,
+  "taxa_aprendizado": 0.05,
+  "runs": 1,
+  "momentum": 0.25,
+  "runs_data": [
+    {
+      "last_error": 0.3044921816861866,
+      "precisao": 0.4544,
+      "positivos": 1136,
+      "negativos": 1364
+    }
+  ],
+  "runs_avg": {
+    "last_error": 0.3044921816861866,
+    "precisao": 0.4544,
+    "positivos": 1136,
+    "negativos": 1364
+  },
+  "layers": 4,
+  "neurons_per_layer": [
+    33,
+    65,
+    32,
+    10
+  ],
+  "bias_type": "no-bias",
+  "activation_function": "activation_function(input) {\r\n        return 1.0 / (1.0 + Math.exp(-input));\r\n    }",
+  "activation_function_derivative": "φ_derivative(input) {\r\n        return Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2);\r\n    }",
+  "input_function": "input_function(inputs) {\r\n        let sum = 0;\r\n        for (const { value, origin } of inputs) {\r\n            // Each unit j first computes a weighted sum of its inputs:\r\n            sum += value * findLinkWeight(origin, this);\r\n        }\r\n        return sum;\r\n    }",
+  "descriptor": "SemiBrief"
+}

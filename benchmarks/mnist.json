@@ -1,0 +1,86 @@
+{
+  "epochs": 60,
+  "iteracoes": 2500,
+  "taxa_aprendizado": 0.04,
+  "runs": 10,
+  "runs_data": [
+    {
+      "last_error": 0.3452620595288868,
+      "precisao": 0.3736,
+      "positivos": 934,
+      "negativos": 1566
+    },
+    {
+      "last_error": 0.34623172789580947,
+      "precisao": 0.3492,
+      "positivos": 873,
+      "negativos": 1627
+    },
+    {
+      "last_error": 0.34496052515827313,
+      "precisao": 0.3764,
+      "positivos": 941,
+      "negativos": 1559
+    },
+    {
+      "last_error": 0.34424606157548054,
+      "precisao": 0.344,
+      "positivos": 860,
+      "negativos": 1640
+    },
+    {
+      "last_error": 0.35214471609735154,
+      "precisao": 0.3732,
+      "positivos": 933,
+      "negativos": 1567
+    },
+    {
+      "last_error": 0.34562014140654573,
+      "precisao": 0.3468,
+      "positivos": 867,
+      "negativos": 1633
+    },
+    {
+      "last_error": 0.3468342225451543,
+      "precisao": 0.3604,
+      "positivos": 901,
+      "negativos": 1599
+    },
+    {
+      "last_error": 0.3462311642137134,
+      "precisao": 0.3324,
+      "positivos": 831,
+      "negativos": 1669
+    },
+    {
+      "last_error": 0.3484222411371944,
+      "precisao": 0.376,
+      "positivos": 940,
+      "negativos": 1560
+    },
+    {
+      "last_error": 0.3457799793779556,
+      "precisao": 0.3664,
+      "positivos": 916,
+      "negativos": 1584
+    }
+  ],
+  "runs_avg": {
+    "last_error": 0.34657328389363645,
+    "precisao": 0.35983999999999994,
+    "positivos": 899.6,
+    "negativos": 1600.4
+  },
+  "layers": 4,
+  "neurons_per_layer": [
+    12,
+    13,
+    12,
+    10
+  ],
+  "bias_type": "no-bias",
+  "activation_function": "activation_function(input) {\r\n        return 1.0 / (1.0 + Math.exp(-input));\r\n    }",
+  "activation_function_derivative": "φ_derivative(input) {\r\n        return Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2);\r\n    }",
+  "input_function": "input_function(inputs) {\r\n        let sum = 0;\r\n        for (const { value, origin } of inputs) {\r\n            // Each unit j first computes a weighted sum of its inputs:\r\n            sum += value * findLinkWeight(origin, this);\r\n        }\r\n        return sum;\r\n    }",
+  "descriptor": "SemiBrief"
+}

@@ -223,6 +223,11 @@ export type TrainConfig = {
     training_set: {inputs: number[], desired_outputs: number[]}[],
 }
 
+type TrainIterationInfo = {
+    iteration_index: number,
+    last_Δw_global: {[key: string]: number},
+}
+
 /**
  * @note A rede só suporta 1 neuronio de bias na camada de entrada
  */
@@ -265,7 +270,7 @@ export class NeuralNetwork {
             }
         }
     }
-    train_iteration(inputs:number[], desired_outputs:number[], config: TrainConfig):number {
+    train_iteration(inputs:number[], desired_outputs:number[], config: TrainConfig, iteration_info:TrainIterationInfo):number {
         const input_layer = this.layers[0];
         /**
          * Adiciona os valores de entrada aos neurônios de entrada
@@ -347,7 +352,10 @@ export class NeuralNetwork {
                  */
                 for (const output of layer_neuron_outputs[layer_neuron_outputs.length - 1]) {
                     for (const δ of δ_saida) {
-                        const Δw = -config.taxa_aprendizado * δ.value * output.value;
+                        let Δw = -config.taxa_aprendizado * δ.value * output.value;
+                        if (config.momentum) {
+                            Δw += (config.momentum * iteration_info.last_Δw_global[findLink(output.origin, δ.origin)] || 0)
+                        }
                         Δw_global.push([Δw, findLink(output.origin, δ.origin)])
                     }
                 }
@@ -370,7 +378,10 @@ export class NeuralNetwork {
                  */
                 for (const output of layer_neuron_outputs[layer_neuron_outputs.length - 1 - layer_index]) {
                     for (const δ of δ_escondida) {
-                        const Δw = -config.taxa_aprendizado * δ.value * output.value;
+                        let Δw = -config.taxa_aprendizado * δ.value * output.value;
+                        if (config.momentum) {
+                            Δw += (config.momentum * iteration_info.last_Δw_global[findLink(output.origin, δ.origin)] || 0)
+                        }
                         Δw_global.push([Δw, findLink(output.origin, δ.origin)])
                     }
                 }
@@ -381,6 +392,9 @@ export class NeuralNetwork {
         //console.log(Δw_global)
         for (const [ Δw, link_name ] of Δw_global) {
             links_ws[link_name]+= Δw
+            if (config.momentum) {
+                iteration_info.last_Δw_global[link_name] = Δw
+            }
         }
 
         return E;
@@ -433,6 +447,7 @@ export class NeuralNetwork {
     }
     train(config: TrainConfig) {
         const Ēs:number[] = []
+        let last_Δw_global = {}
         // Executa o treinamento
         for (let epoch = 0; epoch < config.epochs; epoch++) {
             let error = 0;
@@ -447,7 +462,7 @@ export class NeuralNetwork {
                 if (config.debug && i % 100 == 0) {
                     console.log(`Epoch: ${epoch}/${config.epochs} Iteração: ${i}/${config.iteracoes}`)
                 }
-                error += this.train_iteration(inputs, training_item.desired_outputs, config)
+                error += this.train_iteration(inputs, training_item.desired_outputs, config, { iteration_index: i, last_Δw_global })
             }
             const Ē = (1/config.iteracoes)*error
             if (!config.silent) {

@@ -1,24 +1,35 @@
 import { clearLinks, NeuralNetwork, TrainConfig } from "./nn_organized";
 import fs from "fs";
+import { Descriptor } from "./descriptors/descriptor";
+
 type BechnmarkConfig = {
     v_set:({inputs: number[], desired_outputs: number[]}[]),
     train_config:TrainConfig,
-    get_prediction:(output:number) => number,
+    get_prediction?:(output:number) => number,
+    get_prediction_from_array?:(output:number[]) => number[],
+    on_run_end?:(run:number, last_error:number) => void,
     rede:NeuralNetwork,
-    bechnmark_name:string
+    bechnmark_name:string,
+    runs?: number,
+    descriptor?: Descriptor
 }
 export function benchmark({
+    descriptor,
     v_set,
     train_config,
-    get_prediction,
+    get_prediction = (output:number) => output,
+    get_prediction_from_array = (output:number[]) => output,
+    on_run_end,
     rede,
-    bechnmark_name
+    bechnmark_name,
+    runs = 10
 }:BechnmarkConfig) {
     const resultados:any = {
         "epochs": train_config.epochs,
         "iteracoes": train_config.iteracoes,
         "taxa_aprendizado": train_config.taxa_aprendizado,
-        "runs": 10,
+        "runs": runs,
+        "momentum": train_config.momentum,
         "runs_data": [],
         "runs_avg": {},
         "layers": rede.layers.length,
@@ -26,7 +37,10 @@ export function benchmark({
         "bias_type": rede.layers[0].config.bias ? "as-input-neuron" : "no-bias",
         "activation_function": rede.layers[0].neurons[0].φ.toString(),
         "activation_function_derivative": rede.layers[0].neurons[0].φ_derivative.toString(),
-        "input_function": rede.layers[0].neurons[0].input_function.toString(),
+        "input_function": rede.layers[0].neurons[0].input_function.toString()
+    }
+    if (descriptor) {
+        resultados.descriptor = descriptor.name
     }
     for (let i = 0; i < resultados.runs; i++) {
         console.log('Iniciando run ' + (i+1) + ' de ' + resultados.runs)
@@ -42,12 +56,16 @@ export function benchmark({
         resultado.last_error = train_result.last_error
         
         rede.test(v_set, (err, output, desired) => {
-            const prediction = output.map(get_prediction).toString()
+            const prediction = get_prediction_from_array(output.map(get_prediction)).toString()
             prediction === desired.toString() ? resultado.positivos++ : resultado.negativos++
         })
 
         resultado.precisao = resultado.positivos / (resultado.positivos + resultado.negativos)
         resultados.runs_data.push(resultado)
+        
+        if (on_run_end) {
+            on_run_end(i, resultado.last_error)
+        }
     }
     const runs_sum = resultados.runs_data.reduce((acc, cur) => {
         acc.last_error += cur.last_error

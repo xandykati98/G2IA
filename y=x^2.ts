@@ -1,5 +1,5 @@
 import { benchmark } from "./benchmark"
-import { NeuralNetwork, sigmoidRandom } from "./nn_organized"
+import { NeuralNetwork, sigmoidRandom, TrainConfig } from "./nn_organized"
 
 let rede = new NeuralNetwork()
 rede.pushLayer({
@@ -28,7 +28,7 @@ while (t_set.length < 400) {
         desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
     })
 }
-const train_config = {
+const train_config:TrainConfig = {
     epochs: 60,
     iteracoes: 10000,
     taxa_aprendizado: 0.01,

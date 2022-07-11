@@ -1,27 +1,27 @@
 import { NeuralNetwork, scaleBetween } from './nn_organized';
-// 5000 train, 2500 test
-console.log('Importando dados de: mnist.train.json')
+// 10000 train, 2500 test
 import train_set from './mnist/train.json';
-console.log('Importação finalizada')
-
-console.log('Importando dados de: mnist.test.json')
 import test_set from './mnist/test.json';
-console.log('Importação finalizada')
+import { SemiBrief } from './descriptors/semibrief';
+import { benchmark } from './benchmark';
+
 const train = train_set as { data: number[]; label: string }[];
 const test = test_set as { data: number[]; label: string }[];
 
 const rede = new NeuralNetwork()
 
+const descriptor = new SemiBrief(33, 28**2, 28, 28)
+
 rede.pushLayer({
     is_input: true,
-    neurons_number: 13
+    neurons_number: 33
 })
 
 rede.pushLayer({
-    neurons_number: 26,
+    neurons_number: 65,
 })
 rede.pushLayer({
-    neurons_number: 26,
+    neurons_number: 32,
 })
 
 rede.pushLayer({
@@ -36,22 +36,39 @@ const label_to_output = (label: string) => {
     return output
 }
 const normalized_train_set = train.map(item => ({ 
-    inputs: item.data
-    .map(num => num/255)
-    .filter((_, i) => i % 2 === 0)
-    .filter((_, i) => i % 2 !== 0)
-    .filter((_, i) => i % 2 === 0)
-    .filter((_, i) => i % 2 !== 0), 
+    inputs: descriptor.encode(item.data.map(num => num/255)), 
     desired_outputs: label_to_output(item.label) 
 }))
-console.log(normalized_train_set[0].inputs.length)
-rede.train({
-    taxa_aprendizado: 0.01,
-    epochs: 1000,
-    iteracoes: 10,
-    debug: true,
-    training_set: normalized_train_set
+const normalized_test_set = test.map(item => ({
+    inputs: descriptor.encode(item.data.map(num => num/255)),
+    desired_outputs: label_to_output(item.label)
+}))
+
+const train_config = {
+    taxa_aprendizado: 0.05,
+    epochs: 30,
+    iteracoes: 3200,
+    training_set: normalized_train_set,
+    momentum: 0.25,
+}
+
+benchmark({
+    descriptor: descriptor,
+    v_set: normalized_test_set,
+    train_config: train_config,
+    rede: rede,
+    runs:1,
+    on_run_end: () => {
+        descriptor.reset()
+    },
+    get_prediction_from_array: output => {
+        const max = Math.max(...output)
+        
+        return [...output].map((num) => num === max ? 1 : 0)
+    },
+    bechnmark_name: "mnist-33",
 })
+
 /**
 let v_i = 0;
 

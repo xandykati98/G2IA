@@ -168,10 +168,21 @@ class InputNeuron extends Neuron {
     }
 }
 
+const activation_functions = {
+    sigmoid: (input: number) => 1.0/(1.0 + Math.exp(-input)),
+    sigmoid_derivative: (input: number) => Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2),
+    relu: (input: number) => input > 0 ? input : 0,
+    relu_derivative: (input: number) => input > 0 ? 1 : 0,
+}
+
 /**
  * Configuração de uma camada, utilizada na criação de camadas dinamicamente
  */
 type LayerConfig = {
+    /**
+     * Função de ativação de todos os neuronios da camada
+     */
+    activation_function?: 'sigmoid' | 'relu';
     /**
      * True se a camada for uma camada de entrada
      */
@@ -249,7 +260,12 @@ export class NeuralNetwork {
             neurons.push(bias);
         }
         for (let i = 0; i < layer_config.neurons_number; i++) {
-            neurons.push(new NeuronType())
+            const neuron = new NeuronType()
+            if (layer_config.activation_function) {
+                neuron.activation_function = activation_functions[layer_config.activation_function]
+                neuron.φ_derivative = activation_functions[`${layer_config.activation_function}_derivative`]
+            }
+            neurons.push(neuron)
         }
         // Adiciona a cama a rede
         this.layers.push({

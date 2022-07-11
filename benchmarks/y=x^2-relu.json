@@ -1,0 +1,84 @@
+{
+  "epochs": 60,
+  "iteracoes": 10000,
+  "taxa_aprendizado": 0.01,
+  "runs": 10,
+  "runs_data": [
+    {
+      "last_error": 0.004754648355446583,
+      "precisao": 0.98001998001998,
+      "positivos": 981,
+      "negativos": 20
+    },
+    {
+      "last_error": 0.00586760842942567,
+      "precisao": 0.98001998001998,
+      "positivos": 981,
+      "negativos": 20
+    },
+    {
+      "last_error": 0.05016197010241519,
+      "precisao": 0.942057942057942,
+      "positivos": 943,
+      "negativos": 58
+    },
+    {
+      "last_error": 0.0037098460984716156,
+      "precisao": 0.985014985014985,
+      "positivos": 986,
+      "negativos": 15
+    },
+    {
+      "last_error": 0.03962279514618502,
+      "precisao": 0.8351648351648352,
+      "positivos": 836,
+      "negativos": 165
+    },
+    {
+      "last_error": 0.005981541504954896,
+      "precisao": 0.9760239760239761,
+      "positivos": 977,
+      "negativos": 24
+    },
+    {
+      "last_error": 0.03262537074142242,
+      "precisao": 0.8611388611388612,
+      "positivos": 862,
+      "negativos": 139
+    },
+    {
+      "last_error": 0.004539680875970031,
+      "precisao": 0.985014985014985,
+      "positivos": 986,
+      "negativos": 15
+    },
+    {
+      "last_error": 0.013391706119728097,
+      "precisao": 0.961038961038961,
+      "positivos": 962,
+      "negativos": 39
+    },
+    {
+      "last_error": 0.005878675406320492,
+      "precisao": 0.98001998001998,
+      "positivos": 981,
+      "negativos": 20
+    }
+  ],
+  "runs_avg": {
+    "last_error": 0.016653384278034,
+    "precisao": 0.9485514485514486,
+    "positivos": 949.5,
+    "negativos": 51.5
+  },
+  "layers": 3,
+  "neurons_per_layer": [
+    3,
+    4,
+    1
+  ],
+  "bias_type": "as-input-neuron",
+  "activation_function": "activation_function(input) {\r\n        return 1.0 / (1.0 + Math.exp(-input));\r\n    }",
+  "activation_function_derivative": "φ_derivative(input) {\r\n        return Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2);\r\n    }",
+  "input_function": "input_function(inputs) {\r\n        let sum = 0;\r\n        for (const { value, origin } of inputs) {\r\n            // Each unit j first computes a weighted sum of its inputs:\r\n            sum += value * findLinkWeight(origin, this);\r\n        }\r\n        return sum;\r\n    }"
+}

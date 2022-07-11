@@ -11,7 +11,8 @@ type BechnmarkConfig = {
     rede:NeuralNetwork,
     bechnmark_name:string,
     runs?: number,
-    descriptor?: Descriptor
+    descriptor?: Descriptor,
+    dontSave?: boolean,
 }
 export function benchmark({
     descriptor,
@@ -22,7 +23,8 @@ export function benchmark({
     on_run_end,
     rede,
     bechnmark_name,
-    runs = 10
+    runs = 10,
+    dontSave = false,
 }:BechnmarkConfig) {
     const resultados:any = {
         "epochs": train_config.epochs,
@@ -35,9 +37,7 @@ export function benchmark({
         "layers": rede.layers.length,
         "neurons_per_layer": rede.layers.map(layer => layer.neurons.length),
         "bias_type": rede.layers[0].config.bias ? "as-input-neuron" : "no-bias",
-        "activation_function": rede.layers[0].neurons[0].φ.toString(),
-        "activation_function_derivative": rede.layers[0].neurons[0].φ_derivative.toString(),
-        "input_function": rede.layers[0].neurons[0].input_function.toString()
+        "activation_functions": rede.layers.map(layer => layer.config.activation_function || 'sigmoid')
     }
     if (descriptor) {
         resultados.descriptor = descriptor.name
@@ -86,7 +86,7 @@ export function benchmark({
         positivos: runs_sum.positivos / resultados.runs,
         negativos: runs_sum.negativos / resultados.runs
     }
-
+    if (dontSave) {return}
     // write a file with the benchmark name
     fs.writeFileSync(`./benchmarks/${bechnmark_name}.json`, JSON.stringify(resultados, null, 2));
 }

@@ -1,4 +1,4 @@
-import { NeuralNetwork, scaleBetween } from './nn_organized';
+import { NeuralNetwork, scaleBetween, TrainConfig } from './nn_organized';
 // 10000 train, 2500 test
 import train_set from './mnist/train.json';
 import test_set from './mnist/test.json';
@@ -10,18 +10,16 @@ const test = test_set as { data: number[]; label: string }[];
 
 const rede = new NeuralNetwork()
 
-const descriptor = new SemiBrief(33, 28**2, 28, 28)
+//const descriptor = new SemiBrief(128, 28**2, 28, 28)
 
 rede.pushLayer({
     is_input: true,
-    neurons_number: 33
+    neurons_number: 28**2
 })
 
 rede.pushLayer({
-    neurons_number: 65,
-})
-rede.pushLayer({
-    neurons_number: 32,
+    neurons_number: 128,
+    activation_function: 'relu'
 })
 
 rede.pushLayer({
@@ -36,37 +34,37 @@ const label_to_output = (label: string) => {
     return output
 }
 const normalized_train_set = train.map(item => ({ 
-    inputs: descriptor.encode(item.data.map(num => num/255)), 
+    inputs: item.data.map(num => num/255), // descriptor.encode(item.data.map(num => num/255)), 
     desired_outputs: label_to_output(item.label) 
 }))
 const normalized_test_set = test.map(item => ({
-    inputs: descriptor.encode(item.data.map(num => num/255)),
+    inputs: item.data.map(num => num/255), // descriptor.encode(item.data.map(num => num/255)),
     desired_outputs: label_to_output(item.label)
 }))
 
-const train_config = {
+const train_config:TrainConfig = {
     taxa_aprendizado: 0.05,
-    epochs: 30,
-    iteracoes: 3200,
+    epochs: 24,
+    iteracoes: 100,
     training_set: normalized_train_set,
-    momentum: 0.25,
+    momentum: 0.06
 }
 
 benchmark({
-    descriptor: descriptor,
+    //descriptor: descriptor,
     v_set: normalized_test_set,
     train_config: train_config,
     rede: rede,
     runs:1,
-    on_run_end: () => {
-        descriptor.reset()
-    },
+    //on_run_end: () => {
+    //    descriptor.reset()
+    //},
     get_prediction_from_array: output => {
         const max = Math.max(...output)
         
         return [...output].map((num) => num === max ? 1 : 0)
     },
-    bechnmark_name: "mnist-33",
+    bechnmark_name: "mnist-28x28",
 })
 
 /**

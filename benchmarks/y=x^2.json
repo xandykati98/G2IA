@@ -5,71 +5,71 @@
   "runs": 10,
   "runs_data": [
     {
-      "last_error": 0.013092767262068705,
-      "precisao": 0.983016983016983,
-      "positivos": 984,
-      "negativos": 17
+      "last_error": 0.029211348384266884,
+      "precisao": 0.8321678321678322,
+      "positivos": 833,
+      "negativos": 168
     },
     {
-      "last_error": 0.014222120929044124,
-      "precisao": 0.9820179820179821,
-      "positivos": 983,
-      "negativos": 18
+      "last_error": 0.03643323505845512,
+      "precisao": 0.8911088911088911,
+      "positivos": 892,
+      "negativos": 109
     },
     {
-      "last_error": 0.009174391809302147,
-      "precisao": 0.984015984015984,
-      "positivos": 985,
-      "negativos": 16
+      "last_error": 0.006437579943333296,
+      "precisao": 0.972027972027972,
+      "positivos": 973,
+      "negativos": 28
     },
     {
-      "last_error": 0.01059351248818491,
-      "precisao": 0.983016983016983,
-      "positivos": 984,
-      "negativos": 17
+      "last_error": 0.04570559591833172,
+      "precisao": 0.9560439560439561,
+      "positivos": 957,
+      "negativos": 44
     },
     {
-      "last_error": 0.010107142636823416,
-      "precisao": 0.983016983016983,
-      "positivos": 984,
-      "negativos": 17
-    },
-    {
-      "last_error": 0.009659991599025574,
-      "precisao": 0.985014985014985,
-      "positivos": 986,
-      "negativos": 15
-    },
-    {
-      "last_error": 0.010645745178255978,
-      "precisao": 0.9820179820179821,
-      "positivos": 983,
-      "negativos": 18
-    },
-    {
-      "last_error": 0.012979402532130249,
+      "last_error": 0.004435768048833205,
       "precisao": 0.981018981018981,
       "positivos": 982,
       "negativos": 19
     },
     {
-      "last_error": 0.008836971854273115,
-      "precisao": 0.985014985014985,
-      "positivos": 986,
-      "negativos": 15
+      "last_error": 0.004434593224572626,
+      "precisao": 0.981018981018981,
+      "positivos": 982,
+      "negativos": 19
     },
     {
-      "last_error": 0.010559362696808936,
-      "precisao": 0.9820179820179821,
-      "positivos": 983,
-      "negativos": 18
+      "last_error": 0.006484189229814599,
+      "precisao": 0.972027972027972,
+      "positivos": 973,
+      "negativos": 28
+    },
+    {
+      "last_error": 0.005631749734247432,
+      "precisao": 0.975024975024975,
+      "positivos": 976,
+      "negativos": 25
+    },
+    {
+      "last_error": 0.006788667203573352,
+      "precisao": 0.973026973026973,
+      "positivos": 974,
+      "negativos": 27
+    },
+    {
+      "last_error": 0.006153696233601751,
+      "precisao": 0.974025974025974,
+      "positivos": 975,
+      "negativos": 26
     }
   ],
   "runs_avg": {
-    "last_error": 0.010987140898591713,
-    "precisao": 0.9830169830169831,
-    "positivos": 984,
-    "negativos": 17
+    "last_error": 0.015171642297902998,
+    "precisao": 0.9507492507492508,
+    "positivos": 951.7,
+    "negativos": 49.3
   },
   "layers": 3,
   "neurons_per_layer": [

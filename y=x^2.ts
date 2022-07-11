@@ -10,6 +10,7 @@ rede.pushLayer({
 
 rede.pushLayer({
     neurons_number:4,
+    activation_function: 'relu'
 })
 
 rede.pushLayer({
@@ -33,6 +34,7 @@ const train_config:TrainConfig = {
     iteracoes: 10000,
     taxa_aprendizado: 0.01,
     training_set: t_set,
+    //momentum: 0.2
 }
 /*
 rede.train(train_config)
@@ -60,7 +62,7 @@ benchmark({
     train_config: train_config, 
     get_prediction: output => output > 0.5 ? 1 : 0, 
     rede: rede, 
-    bechnmark_name: "y=x^2"
+    bechnmark_name: "y=x^2-relu",
 })
 
 /*

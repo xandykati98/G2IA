@@ -3,7 +3,7 @@ import { Descriptor } from "./descriptor";
 /**
  * Acha pares de forma aleatória
  */
-export class SemiBrief extends Descriptor{
+export class SemiBrief extends Descriptor {
     pairs_qtd: number;
     pairs: number[][]
     constructor(pairs_qtd:number, flattened_image_size: number, original_w: number, original_h: number) {

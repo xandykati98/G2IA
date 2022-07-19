@@ -172,13 +172,14 @@ const activation_functions = {
     sigmoid: (input: number) => 1.0/(1.0 + Math.exp(-input)),
     sigmoid_derivative: (input: number) => Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2),
     relu: (input: number) => input > 0 ? input : 0,
-    relu_derivative: (input: number) => input > 0 ? 1 : 0,
+    relu_derivative: (input: number) => input > 0 ? 1 : 0
 }
 
 /**
  * Configuração de uma camada, utilizada na criação de camadas dinamicamente
  */
 type LayerConfig = {
+    inline_bias?: boolean
     /**
      * Função de ativação de todos os neuronios da camada
      */
@@ -239,6 +240,14 @@ type TrainIterationInfo = {
     last_Δw_global: {[key: string]: number},
 }
 
+const softmax = (vector:number[]) => {
+    let sum = 0;
+    for (let i = 0; i < vector.length; i++) {
+        sum += Math.exp(vector[i]);
+    }
+    return vector.map(x => Math.exp(x) / sum)
+}
+
 /**
  * @note A rede só suporta 1 neuronio de bias na camada de entrada
  */
@@ -253,6 +262,7 @@ export class NeuralNetwork {
         const NeuronType = layer_config.is_input ? InputNeuron : Neuron
         // Cria a array de neurônios da camada
         const neurons:Neuron[] = [];
+
         // Adiciona o bias a camada de entrada caso necessário
         if (layer_config.bias) {
             const bias = new InputNeuron();
@@ -267,6 +277,20 @@ export class NeuralNetwork {
             }
             neurons.push(neuron)
         }
+        
+        if (layer_config.inline_bias) {
+            for (const neuron of neurons) {
+                neuron.input_function = (inputs: NeuronOutput[]): number => {
+                    let sum = 0;
+                    for (const { value, origin } of inputs) {
+                        // Each unit j first computes a weighted sum of its inputs:
+                        sum += value * findLinkWeight(origin, neuron)
+                    }
+                    return sum + (1 * findLinkWeight(neuron, neuron))
+                }
+            }
+        }
+
         // Adiciona a cama a rede
         this.layers.push({
             config: {...layer_config, is_hidden},
@@ -278,6 +302,11 @@ export class NeuralNetwork {
      */
     createWeights() {
         for (const [index, layer] of this.layers.entries()) {
+            if (layer.config.inline_bias) {
+                for (const neuron of layer.neurons) {
+                    createLink(neuron, neuron)
+                }
+            }
             for (const neuron of layer.neurons) {
                 if (!this.layers[index+1]) return;
                 for (const neuron_of_next_layer of this.layers[index+1].neurons) {
@@ -330,8 +359,8 @@ export class NeuralNetwork {
         for (const unit of this.layers[this.layers.length - 1].neurons) {
             // Alimentando o resultado da ultima camada escondida antes da camada de saida
             output_response.push(unit.receive(layer_neuron_outputs[layer_neuron_outputs.length - 1]))
-        }
-        
+        }        
+
         /**
          * E = Erro global instantâneo (nessa iteração)
          * E(n) = 1/2  \sum_{j=1}^{J} e^2_{j}(n)
@@ -354,7 +383,7 @@ export class NeuralNetwork {
                  * Calculo de gradiente local dos neuronios na camada de saida
                  * é bem simples já que a gente pode usar o calculo de erro com base na saida desejada
                  * δ_{j}(n)=-e_{j}(n)φ'_{j}(v_{j}(n))
-                 * δ_{j}(n) = -(desired[j] - unit.value) * unit.φ'(unit.value)
+                 * δ_{j}(n) = -(desired[j] - unit.value) * unit.φ'(unit.weighted_sum)
                  */
                 const δ_saida:{ origin: Neuron, value: number }[] = []
                 for (const [neuron, output, j]  of junct(layer.neurons, output_response)) {

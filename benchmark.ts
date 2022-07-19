@@ -26,11 +26,13 @@ export function benchmark({
     runs = 10,
     dontSave = false,
 }:BechnmarkConfig) {
+    const start = Date.now()
     const resultados:any = {
         "epochs": train_config.epochs,
         "iteracoes": train_config.iteracoes,
         "taxa_aprendizado": train_config.taxa_aprendizado,
         "runs": runs,
+        "tempo": 0,
         "momentum": train_config.momentum,
         "runs_data": [],
         "runs_avg": {},
@@ -87,6 +89,11 @@ export function benchmark({
         negativos: runs_sum.negativos / resultados.runs
     }
     if (dontSave) {return}
+
+    const end = Date.now()
+    // tempo em segundos
+    resultados.tempo = (end - start) / 1000
+
     // write a file with the benchmark name
     fs.writeFileSync(`./benchmarks/${bechnmark_name}.json`, JSON.stringify(resultados, null, 2));
 }

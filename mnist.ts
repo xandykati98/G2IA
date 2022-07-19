@@ -2,26 +2,31 @@ import { NeuralNetwork, scaleBetween, TrainConfig } from './nn_organized';
 // 10000 train, 2500 test
 import train_set from './mnist/train.json';
 import test_set from './mnist/test.json';
-import { SemiBrief } from './descriptors/semibrief';
+import { SemiBriefClose } from './descriptors/semibrief-close';
 import { benchmark } from './benchmark';
+import { SemiBrief } from './descriptors/semibrief';
 
 const train = train_set as { data: number[]; label: string }[];
 const test = test_set as { data: number[]; label: string }[];
 
 const rede = new NeuralNetwork()
 
-//const descriptor = new SemiBrief(128, 28**2, 28, 28)
+const descriptor = new SemiBriefClose(28*28, 28**2, 28, 28)
 
 rede.pushLayer({
     is_input: true,
-    neurons_number: 28**2
+    neurons_number: 28*28,
+    bias: true
 })
 
 rede.pushLayer({
-    neurons_number: 128,
-    activation_function: 'relu'
+    inline_bias: true,
+    neurons_number: 40
 })
-
+rede.pushLayer({
+    inline_bias: true,
+    neurons_number: 20
+})
 rede.pushLayer({
     is_output: true,
     neurons_number: 10,
@@ -34,20 +39,20 @@ const label_to_output = (label: string) => {
     return output
 }
 const normalized_train_set = train.map(item => ({ 
-    inputs: item.data.map(num => num/255), // descriptor.encode(item.data.map(num => num/255)), 
+    inputs: item.data.map(num => num/255), //descriptor.encode(item.data.map(num => num/255)), 
     desired_outputs: label_to_output(item.label) 
 }))
 const normalized_test_set = test.map(item => ({
-    inputs: item.data.map(num => num/255), // descriptor.encode(item.data.map(num => num/255)),
+    inputs: item.data.map(num => num/255),//descriptor.encode(item.data.map(num => num/255)),
     desired_outputs: label_to_output(item.label)
 }))
 
 const train_config:TrainConfig = {
-    taxa_aprendizado: 0.05,
-    epochs: 24,
-    iteracoes: 100,
+    taxa_aprendizado: 0.1,
+    epochs: 35,
+    iteracoes: 3000,
     training_set: normalized_train_set,
-    momentum: 0.06
+    momentum: 0.05
 }
 
 benchmark({
@@ -64,7 +69,7 @@ benchmark({
         
         return [...output].map((num) => num === max ? 1 : 0)
     },
-    bechnmark_name: "mnist-28x28",
+    bechnmark_name: "mnist-28x28-megabias-10-10",
 })
 
 /**

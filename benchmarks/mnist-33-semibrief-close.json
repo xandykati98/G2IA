@@ -1,0 +1,89 @@
+{
+  "epochs": 30,
+  "iteracoes": 3000,
+  "taxa_aprendizado": 0.05,
+  "runs": 10,
+  "momentum": 0.05,
+  "runs_data": [
+    {
+      "last_error": 0.24561869363632038,
+      "precisao": 0.5876,
+      "positivos": 1469,
+      "negativos": 1031
+    },
+    {
+      "last_error": 0.2474057873218158,
+      "precisao": 0.574,
+      "positivos": 1435,
+      "negativos": 1065
+    },
+    {
+      "last_error": 0.24880378819358345,
+      "precisao": 0.5788,
+      "positivos": 1447,
+      "negativos": 1053
+    },
+    {
+      "last_error": 0.2493841368909042,
+      "precisao": 0.578,
+      "positivos": 1445,
+      "negativos": 1055
+    },
+    {
+      "last_error": 0.24787591185920163,
+      "precisao": 0.582,
+      "positivos": 1455,
+      "negativos": 1045
+    },
+    {
+      "last_error": 0.23796969724256886,
+      "precisao": 0.592,
+      "positivos": 1480,
+      "negativos": 1020
+    },
+    {
+      "last_error": 0.2522083476197422,
+      "precisao": 0.5792,
+      "positivos": 1448,
+      "negativos": 1052
+    },
+    {
+      "last_error": 0.24811292370784102,
+      "precisao": 0.5692,
+      "positivos": 1423,
+      "negativos": 1077
+    },
+    {
+      "last_error": 0.24994075070006636,
+      "precisao": 0.5832,
+      "positivos": 1458,
+      "negativos": 1042
+    },
+    {
+      "last_error": 0.2500509076739157,
+      "precisao": 0.5908,
+      "positivos": 1477,
+      "negativos": 1023
+    }
+  ],
+  "runs_avg": {
+    "last_error": 0.24773709448459594,
+    "precisao": 0.58148,
+    "positivos": 1453.7,
+    "negativos": 1046.3
+  },
+  "layers": 4,
+  "neurons_per_layer": [
+    33,
+    34,
+    16,
+    10
+  ],
+  "bias_type": "no-bias",
+  "activation_functions": [
+    "sigmoid",
+    "sigmoid",
+    "sigmoid",
+    "sigmoid"
+  ]
+}

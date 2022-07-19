@@ -1,0 +1,38 @@
+{
+  "epochs": 30,
+  "iteracoes": 3000,
+  "taxa_aprendizado": 0.05,
+  "runs": 1,
+  "tempo": 10187.93,
+  "momentum": 0.05,
+  "runs_data": [
+    {
+      "last_error": 0.03194507059287023,
+      "precisao": 0.8288,
+      "positivos": 2072,
+      "negativos": 428
+    }
+  ],
+  "runs_avg": {
+    "last_error": 0.03194507059287023,
+    "precisao": 0.8288,
+    "positivos": 2072,
+    "negativos": 428
+  },
+  "layers": 5,
+  "neurons_per_layer": [
+    256,
+    128,
+    128,
+    32,
+    10
+  ],
+  "bias_type": "no-bias",
+  "activation_functions": [
+    "sigmoid",
+    "sigmoid",
+    "sigmoid",
+    "sigmoid",
+    "sigmoid"
+  ]
+}

@@ -1,4 +1,4 @@
-import { clearLinks, NeuralNetwork, TrainConfig } from "./nn_organized";
+import { clearLinks, links_ws, NeuralNetwork, TrainConfig } from "./nn_organized";
 import fs from "fs";
 import { Descriptor } from "./descriptors/descriptor";
 
@@ -13,10 +13,13 @@ type BechnmarkConfig = {
     runs?: number,
     descriptor?: Descriptor,
     dontSave?: boolean,
+    saveModel?: boolean,
+    t_set?: ({inputs: number[], desired_outputs: number[]}[]),
 }
-export function benchmark({
+export async function benchmark({
     descriptor,
     v_set,
+    t_set = [],
     train_config,
     get_prediction = (output:number) => output,
     get_prediction_from_array = (output:number[]) => output,
@@ -25,6 +28,7 @@ export function benchmark({
     bechnmark_name,
     runs = 10,
     dontSave = false,
+    saveModel = false,
 }:BechnmarkConfig) {
     const start = Date.now()
     const resultados:any = {
@@ -94,6 +98,15 @@ export function benchmark({
     // tempo em segundos
     resultados.tempo = (end - start) / 1000
 
+    if (saveModel || process.argv.includes('--save')) {
+        fs.writeFileSync(`./models/${bechnmark_name}.json`, JSON.stringify({
+            links_ws, 
+            v_set,
+            t_set,
+            layer_configs: rede.layers.map(layer => layer.config),
+            neuron_ids: rede.layers.map(layer => layer.neurons.map(neuron => neuron.id))
+        }, null, 2))
+    }
     // write a file with the benchmark name
     fs.writeFileSync(`./benchmarks/${bechnmark_name}.json`, JSON.stringify(resultados, null, 2));
 }

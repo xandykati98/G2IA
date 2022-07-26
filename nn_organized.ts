@@ -167,10 +167,10 @@ class InputNeuron extends Neuron {
         this.in_value = 0;
     }
 }
-
+const sigmoid_func = (input: number) => 1.0/(1.0 + Math.exp(-input))
 const activation_functions = {
-    sigmoid: (input: number) => 1.0/(1.0 + Math.exp(-input)),
-    sigmoid_derivative: (input: number) => Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2),
+    sigmoid: sigmoid_func,
+    sigmoid_derivative: (input: number) => sigmoid_func(input) * (1 - sigmoid_func(input)),
     relu: (input: number) => input > 0 ? input : 0,
     relu_derivative: (input: number) => input > 0 ? 1 : 0
 }
@@ -512,6 +512,16 @@ export class NeuralNetwork {
             const Ē = (1/config.iteracoes)*error
             if (!config.silent) {
                 console.log({epoch, erro_medio: Ē})
+                if (true) {
+                    const test_set = config.training_set.slice(0,100).map(({inputs, desired_outputs}) => ({inputs, desired_outputs, guess: this.guess(inputs)}))
+                    // calculate accuracy
+                    const precisao = test_set.reduce((acc, {inputs, desired_outputs, guess}) => {
+                        const innererror = sum(desired_outputs.map((desired, i) => Math.abs(desired - guess[i])))
+                        return acc + innererror
+                    }
+                    , 0) / test_set.length
+                    console.log({accuracy: precisao})
+                }
             }
             Ēs.push(Ē)
             // Verifica se a parada deve ser feita

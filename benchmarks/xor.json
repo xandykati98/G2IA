@@ -3,70 +3,72 @@
   "iteracoes": 10000,
   "taxa_aprendizado": 0.01,
   "runs": 10,
+  "tempo": 73.775,
+  "momentum": 0.01,
   "runs_data": [
     {
-      "last_error": 0.00031598689109542936,
+      "last_error": 0.000324786492008697,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00033086915505730024,
+      "last_error": 0.00022794870235218095,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.0003736954075706802,
+      "last_error": 0.00033033194777588095,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00024860067565984266,
+      "last_error": 0.00028713475908108253,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00040247729825628175,
+      "last_error": 0.000341785053407369,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.000370735103908716,
+      "last_error": 0.00031895796222824736,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.0002990111522158753,
+      "last_error": 0.000278364620246406,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00024457826686051536,
+      "last_error": 0.0002842723400690085,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.0004747947162990177,
+      "last_error": 0.00031727431041525317,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00032884243312121373,
+      "last_error": 0.00038940231334049104,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     }
   ],
   "runs_avg": {
-    "last_error": 0.0003389591100044872,
+    "last_error": 0.00031002585009246166,
     "precisao": 1,
     "positivos": 200,
     "negativos": 0
@@ -78,7 +80,9 @@
     1
   ],
   "bias_type": "as-input-neuron",
-  "activation_function": "activation_function(input) {\r\n        return 1.0 / (1.0 + Math.exp(-input));\r\n    }",
-  "activation_function_derivative": "φ_derivative(input) {\r\n        return Math.exp(-input) / Math.pow(1 + Math.exp(-input), 2);\r\n    }",
-  "input_function": "input_function(inputs) {\r\n        let sum = 0;\r\n        for (const { value, origin } of inputs) {\r\n            // Each unit j first computes a weighted sum of its inputs:\r\n            sum += value * findLinkWeight(origin, this);\r\n        }\r\n        return sum;\r\n    }"
+  "activation_functions": [
+    "sigmoid",
+    "sigmoid",
+    "sigmoid"
+  ]
 }

@@ -10,7 +10,15 @@ rede.pushLayer({
 
 rede.pushLayer({
     neurons_number:4,
-    activation_function: 'relu'
+    activation_function: 'sigmoid'
+})
+rede.pushLayer({
+    neurons_number:4,
+    activation_function: 'sigmoid'
+})
+rede.pushLayer({
+    neurons_number:4,
+    activation_function: 'sigmoid'
 })
 
 rede.pushLayer({
@@ -26,7 +34,7 @@ while (t_set.length < 400) {
     const input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)];
     t_set.push({
         inputs: input,
-        desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
+        desired_outputs: [((input[0]**2) < (input[1])) ? 1 : 0]
     })
 }
 const train_config:TrainConfig = {
@@ -52,7 +60,7 @@ while (i_validacao < 1000) {
     const input = [sigmoidRandom(-10, 10), sigmoidRandom(0, 80)];
     v_set.push({
         inputs: input,
-        desired_outputs: [((input[0]**2) > (input[1])) ? 1 : 0]
+        desired_outputs: [((input[0]**2) < (input[1])) ? 1 : 0]
     })
     i_validacao++;
 }
@@ -62,7 +70,9 @@ benchmark({
     train_config: train_config, 
     get_prediction: output => output > 0.5 ? 1 : 0, 
     rede: rede, 
-    bechnmark_name: "y=x^2-relu",
+    runs:1,
+    saveWeights: true,
+    bechnmark_name: "y=x^2-save",
 })
 
 /*

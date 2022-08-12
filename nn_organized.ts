@@ -56,8 +56,8 @@ export function randomFromInterval(min:number, max:number) {
  * @param end neuronio de destino
  * @returns peso da conexão entre os dois neurônios
  */
-function createLink(origin: Neuron, end: Neuron) {
-    links_ws[origin.id+'_to_'+end.id] = randomFromInterval(-1, 1)
+function createLink(origin: Neuron, end: Neuron, w?:number) {
+    links_ws[origin.id+'_to_'+end.id] = w || randomFromInterval(-1, 1)
     return links_ws[origin.id+'_to_'+end.id]
 }
 
@@ -68,7 +68,7 @@ function createLink(origin: Neuron, end: Neuron) {
  * @returns peso da conexão entre os dois neurônios
  */
 function findLinkWeight(origin: Neuron, end: Neuron) {
-    return links_ws[origin.id+'_to_'+end.id]
+    return links_ws[origin.id+'_to_'+end.id] || 0
 }
 /**
  * Retorna o nome da conexão entre dois neurônios
@@ -172,7 +172,12 @@ const activation_functions = {
     sigmoid: sigmoid_func,
     sigmoid_derivative: (input: number) => sigmoid_func(input) * (1 - sigmoid_func(input)),
     relu: (input: number) => input > 0 ? input : 0,
-    relu_derivative: (input: number) => input > 0 ? 1 : 0
+    relu_derivative: (input: number) => input > 0 ? 1 : 0,
+
+    linear: (input: number) => input,
+    linear_derivative: (input: number) => 1,
+    tanh: (input: number) => Math.tanh(input),
+    tanh_derivative: (input: number) => 1 - Math.tanh(input) * Math.tanh(input),
 }
 
 /**
@@ -192,10 +197,17 @@ type LayerConfig = {
      * True se a camada for uma camada de saída
      */
     is_output?: boolean,
+    is_convolutional?: boolean,
+    convolutional_config?: {
+        filter_size: number,
+        stride: number,
+        input_image_width: number,
+        input_image_height: number,
+    }
     /**
      * Número de neurônios na camada
      */
-    neurons_number: number,
+    neurons_number?: number,
     /**
      * Neurônio de bias
      */
@@ -269,11 +281,22 @@ export class NeuralNetwork {
             bias.in_value = 1;
             neurons.push(bias);
         }
+        if (!layer_config.neurons_number) {
+            if (layer_config.is_convolutional && layer_config.convolutional_config) {
+                const { input_image_width, input_image_height, filter_size, stride } = layer_config.convolutional_config;
+                layer_config.neurons_number = (input_image_width - filter_size + 1) / stride;
+            } else {
+                layer_config.neurons_number = 1;
+            }
+        }
         for (let i = 0; i < layer_config.neurons_number; i++) {
             const neuron = new NeuronType()
             if (layer_config.activation_function) {
                 neuron.activation_function = activation_functions[layer_config.activation_function]
                 neuron.φ_derivative = activation_functions[`${layer_config.activation_function}_derivative`]
+            } else if (layer_config.is_convolutional) {
+                neuron.activation_function = activation_functions.linear
+                neuron.φ_derivative = activation_functions.linear_derivative
             }
             neurons.push(neuron)
         }
@@ -288,31 +311,61 @@ export class NeuralNetwork {
                     }
                     return sum + (1 * findLinkWeight(neuron, neuron))
                 }
+                createLink(neuron, neuron)
             }
         }
 
-        // Adiciona a cama a rede
-        this.layers.push({
+        const layer = {
             config: {...layer_config, is_hidden},
             neurons: neurons
-        })
+        }
+        // Adiciona a cama a rede
+        const layers_n = this.layers.push(layer)
+        this.initWeights(layer, layers_n - 1)
+
+        return layer.neurons.length
     }
-    /**
-     * Cria os pesos de cada conexão entre os neurônios
-     */
-    createWeights() {
-        for (const [index, layer] of this.layers.entries()) {
-            if (layer.config.inline_bias) {
-                for (const neuron of layer.neurons) {
-                    createLink(neuron, neuron)
+    initWeights(layer: Layer, layer_index:number) {
+        if (layer.config.is_convolutional && layer.config.convolutional_config) {
+            const output_neurons = layer.neurons;
+            const input_neurons = this.layers[layer_index - 1].neurons;
+
+            const { filter_size, stride, input_image_width, input_image_height } = layer.config.convolutional_config;
+
+            for (const [neuron_index, neuron] of output_neurons.entries()) {
+                // get x,y coordinates of the current neuron
+                const x = neuron_index % (input_image_width - filter_size + 1)
+                const y = Math.floor(neuron_index / (input_image_width - filter_size + 1))
+                // get the input neurons that are part of the current filter
+                const input_neurons_in_filter:Neuron[] = [];
+                for (let i = 0; i < filter_size; i++) {
+                    for (let j = 0; j < filter_size; j++) {
+                        const input_neuron_index = (y + i) * (input_image_width - filter_size + 1) + (x + j)
+                        if (input_neuron_index >= 0 && input_neuron_index < input_neurons.length) {
+                            input_neurons_in_filter.push(input_neurons[input_neuron_index])
+                        }
+                    }
+                }
+                for (const input_neuron of input_neurons_in_filter) {
+                    createLink(input_neuron, neuron)
                 }
             }
+
+        } else if (layer.config.is_hidden || layer.config.is_output) {
+            const prev_layer = this.layers[layer_index - 1];
+            const prev_neurons = prev_layer.neurons;
             for (const neuron of layer.neurons) {
-                if (!this.layers[index+1]) return;
-                for (const neuron_of_next_layer of this.layers[index+1].neurons) {
-                    createLink(neuron, neuron_of_next_layer)
+                for (const prev_neuron of prev_neurons) {
+                    createLink(prev_neuron, neuron)
                 }
             }
+        }
+    }
+    initAllWeights() {
+        let index = 0;
+        for (const layer of this.layers) {
+            this.initWeights(layer, index)
+            index++
         }
     }
     train_iteration(inputs:number[], desired_outputs:number[], config: TrainConfig, iteration_info:TrainIterationInfo):number {
@@ -341,7 +394,7 @@ export class NeuralNetwork {
                 // ps.: talvez esse valor poderia ser armazenado na variavel layer_neuron_outputs também mas escolhi assim para acessar a variavel mais facilmente
                 break;
             }
-            if (config.is_hidden) {
+            if (config.is_hidden || config.is_convolutional) {
                 const hidden_response:NeuronOutput[] = []
                 for (const neuron of neurons) {
                     // Alimentando o resultado da ultima camada
@@ -404,7 +457,7 @@ export class NeuralNetwork {
                         Δw_global.push([Δw, findLink(output.origin, δ.origin)])
                     }
                 }
-            } else if (layer.config.is_hidden) {
+            } else if (layer.config.is_hidden || layer.config.is_convolutional) {
                 /**
                  * Calculo de gradiente local dos neuronios na camada escondida (J)
                  * δ_{j}(n)=φ'_{j}(v_{j}(n)) \sum_{i=1}^{I}δ_{i}(n)w_{ji}
@@ -464,7 +517,7 @@ export class NeuralNetwork {
             if (config.is_output) {
                 break;
             }
-            if (config.is_hidden) {
+            if (config.is_hidden || config.is_convolutional) {
                 const hidden_response:NeuronOutput[] = []
                 for (const neuron of neurons) {
                     // Alimentando o resultado da ultima camada

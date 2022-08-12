@@ -57,7 +57,7 @@ export async function benchmark({
             negativos: 0
         }
         clearLinks()
-        rede.createWeights()
+        rede.initAllWeights()
         const train_result = rede.train(train_config)
         resultado.last_error = train_result.last_error
         

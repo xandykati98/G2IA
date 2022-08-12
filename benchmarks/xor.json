@@ -3,72 +3,72 @@
   "iteracoes": 10000,
   "taxa_aprendizado": 0.01,
   "runs": 10,
-  "tempo": 73.775,
+  "tempo": 65.652,
   "momentum": 0.01,
   "runs_data": [
     {
-      "last_error": 0.000324786492008697,
+      "last_error": 0.00037972608042426516,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00022794870235218095,
+      "last_error": 0.0003145528290706757,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00033033194777588095,
+      "last_error": 0.0003362305423949407,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00028713475908108253,
+      "last_error": 0.00026778809235645173,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.000341785053407369,
+      "last_error": 0.0002822253755212161,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00031895796222824736,
+      "last_error": 0.0002838523065549138,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.000278364620246406,
+      "last_error": 0.00030390406794115506,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.0002842723400690085,
+      "last_error": 0.0002944794139887711,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00031727431041525317,
+      "last_error": 0.0002844658763995357,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     },
     {
-      "last_error": 0.00038940231334049104,
+      "last_error": 0.0003298119626180774,
       "precisao": 1,
       "positivos": 200,
       "negativos": 0
     }
   ],
   "runs_avg": {
-    "last_error": 0.00031002585009246166,
+    "last_error": 0.00030770365472700025,
     "precisao": 1,
     "positivos": 200,
     "negativos": 0

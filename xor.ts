@@ -1,5 +1,5 @@
 import { benchmark } from "./benchmark";
-import { NeuralNetwork } from "./nn_organized";
+import { links_ws, NeuralNetwork } from "./nn_organized";
 
 const rede = new NeuralNetwork();
 rede.pushLayer({
@@ -14,7 +14,6 @@ rede.pushLayer({
     is_output: true,
     neurons_number: 1,
 })
-rede.createWeights();
 
 const train_set:any[] = [
     { inputs: [0, 0, 1], desired_outputs: [0] },

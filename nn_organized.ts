@@ -188,7 +188,7 @@ type LayerConfig = {
     /**
      * Função de ativação de todos os neuronios da camada
      */
-    activation_function?: 'sigmoid' | 'relu';
+    activation_function?: 'sigmoid' | 'relu' | 'linear' | 'tanh';
     /**
      * True se a camada for uma camada de entrada
      */

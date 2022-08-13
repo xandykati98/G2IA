@@ -25,17 +25,17 @@ rede.pushLayer({
 rede.pushLayer({
     neurons_number:9,
     inline_bias: true,
-    activation_function: 'sigmoid'
+    activation_function: 'relu'
 })
 rede.pushLayer({
     neurons_number:9,
     inline_bias: true,
-    activation_function: 'sigmoid'
+    activation_function: 'relu'
 })
 rede.pushLayer({
     neurons_number:9,
     inline_bias: true,
-    activation_function: 'sigmoid'
+    activation_function: 'relu'
 })
 
 rede.pushLayer({

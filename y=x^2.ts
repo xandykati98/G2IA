@@ -26,7 +26,7 @@ rede.pushLayer({
     neurons_number: 1,
 })
 
-rede.createWeights()
+rede.initAllWeights()
 
 // Criação do conjunto de treinamento
 let t_set:any[] = []
@@ -71,7 +71,7 @@ benchmark({
     get_prediction: output => output > 0.5 ? 1 : 0, 
     rede: rede, 
     runs:1,
-    saveWeights: true,
+    saveModel: true,
     bechnmark_name: "y=x^2-save",
 })
 

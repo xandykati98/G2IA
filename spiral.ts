@@ -63,7 +63,7 @@ rede.pushLayer({
     neurons_number: 1,
 })
 
-rede.createWeights()
+rede.initAllWeights()
 
 const train_set = [...po, ...ne].map(sample => {
     return {

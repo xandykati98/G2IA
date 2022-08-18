@@ -32,7 +32,7 @@ rede.pushLayer({
     neurons_number: 10,
 })
 
-rede.createWeights()
+rede.initAllWeights()
 const label_to_output = (label: string) => {
     const output = new Array(10).fill(0)
     output[parseInt(label)] = 1
